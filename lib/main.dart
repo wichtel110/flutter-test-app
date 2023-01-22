@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+import 'package:flutter_test_app/pages/Scanbot.dart';
+
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -18,8 +20,8 @@ class MyApp extends StatelessWidget {
 }
 
 List<int> generateRandomList() {
-  var rng = new Random();
-  var list = new List<int>.generate(1000000, (_) => rng.nextInt(1000000));
+  var rng = Random();
+  var list = List<int>.generate(1000000, (_) => rng.nextInt(1000000));
   return list.toSet().toList();
 }
 
@@ -74,6 +76,16 @@ class NavDrawer extends StatelessWidget {
               Navigator.pop(context);
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => SortView(),
+              ));
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.scanner),
+            title: const Text('Scanbot'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => ScanBot(),
               ));
             },
           ),
@@ -134,8 +146,8 @@ class _SortViewState extends State<SortView> {
   }
 
   void generateAndSortList() {
-    var rng = new Random();
-    var list = new List<int>.generate(100000, (_) => rng.nextInt(100000));
+    var rng = Random();
+    var list = List<int>.generate(100000, (_) => rng.nextInt(100000));
     setState(() {
       _list = list.toSet().toList();
     });
@@ -155,21 +167,17 @@ class _SortViewState extends State<SortView> {
       ),
       body: Column(
         children: <Widget>[
-          _timeTaken != null
-              ? Text('Time taken: ${_timeTaken.toStringAsFixed(3)} ms')
-              : Container(),
-          _list != null
-              ? Expanded(
-                  child: ListView.builder(
-                    itemCount: _list.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(_list[index].toString()),
-                      );
-                    },
-                  ),
-                )
-              : Container(),
+          Text('Time taken: ${_timeTaken.toStringAsFixed(3)} ms'),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _list.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(_list[index].toString()),
+                );
+              },
+            ),
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(

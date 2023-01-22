@@ -12,8 +12,15 @@ dependencies:
   flutter:
     sdk: flutter
 
+  scanbot_sdk: ^2.10.0
+  scanbot_image_picker: 1.0.0
+  permission_handler: ^8.3.0
+
   english_words: ^4.0.0
   provider: ^6.0.0
+  logging: ^1.0.0
+  shared_preferences: 2.0.4
+  path_provider: ^2.0.9
 
 dev_dependencies:
   flutter_test:
