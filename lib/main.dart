@@ -1,147 +1,81 @@
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'dart:math';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  static const appTitle = 'Drawer Demo';
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'Namer App',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        ),
-        home: MyHomePage(),
-      ),
+    return const MaterialApp(
+      title: appTitle,
+      home: MyHomePage(title: appTitle),
     );
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
-
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
-  }
-
-  var favorites = <WordPair>[];
-
-  void toggleFavorite() {
-    if (favorites.contains(current)) {
-      favorites.remove(current);
-    } else {
-      favorites.add(current);
-    }
-    notifyListeners();
-  }
+List<int> generateRandomList() {
+  var rng = new Random();
+  var list = new List<int>.generate(1000000, (_) => rng.nextInt(1000000));
+  return list.toSet().toList();
 }
 
-class MyHomePage extends StatefulWidget {
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key, required this.title});
 
-class _MyHomePageState extends State<MyHomePage> {
-  var selectedIndex = 0;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
-    Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = GeneratorPage();
-        break;
-      case 1:
-        page = FavoritesPages();
-        break;
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
-    }
-
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        body: Row(
-          children: [
-            SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 600, // ← Here.
-                destinations: [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.home),
-                    label: Text('Home'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
-                  ),
-                ],
-                selectedIndex: selectedIndex,
-                onDestinationSelected: (value) {
-                  setState(() {
-                    selectedIndex = value;
-                  });
-                },
-              ),
-            ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: page,
-              ),
-            ),
-          ],
-        ),
-      );
-    });
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Center(
+        child: Container(),
+      ),
+      drawer: NavDrawer(),
+    );
   }
 }
 
-class GeneratorPage extends StatelessWidget {
+class NavDrawer extends StatelessWidget {
+  const NavDrawer({
+    Key? key,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-
-    IconData icon;
-    if (appState.favorites.contains(pair)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: [
-          BigCard(pair: pair),
-          SizedBox(height: 10),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite();
-                },
-                icon: Icon(icon),
-                label: Text('Like'),
-              ),
-              SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next'),
-              ),
-            ],
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+            ),
+            child: Text('Drawer Header'),
+          ),
+          ListTile(
+            leading: Icon(Icons.home),
+            title: const Text('Item 1'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const Page(title: "Item 1"),
+              ));
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.pedal_bike),
+            title: const Text('BubbleSort'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => SortView(),
+              ));
+            },
           ),
         ],
       ),
@@ -149,56 +83,99 @@ class GeneratorPage extends StatelessWidget {
   }
 }
 
-class BigCard extends StatelessWidget {
-  const BigCard({
-    Key? key,
-    required this.pair,
-  }) : super(key: key);
+class Page extends StatelessWidget {
+  final String title;
 
-  final WordPair pair;
+  const Page({
+    Key? key,
+    required this.title,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    var style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimary,
-    );
-    return Card(
-      color: theme.colorScheme.primary,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Text(
-          pair.asLowerCase,
-          style: style,
-          semanticsLabel: pair.asPascalCase,
-        ),
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      drawer: NavDrawer(),
+      body: SafeArea(
+        child: Center(
+            child: Column(
+          children: [
+            Text(
+              title,
+              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            ),
+          ],
+        )),
       ),
     );
   }
 }
 
-class FavoritesPages extends StatelessWidget {
+class SortView extends StatefulWidget {
+  @override
+  _SortViewState createState() => _SortViewState();
+}
+
+class _SortViewState extends State<SortView> {
+  List<int> _list = [];
+  double _timeTaken = 0.0;
+
+  void bubbleSort(List<int> list) {
+    print(" istarted");
+    for (int i = 0; i < list.length; i++) {
+      for (int j = 0; j < list.length - i - 1; j++) {
+        if (list[j] > list[j + 1]) {
+          int temp = list[j];
+          list[j] = list[j + 1];
+          list[j + 1] = temp;
+        }
+      }
+    }
+  }
+
+  void generateAndSortList() {
+    var rng = new Random();
+    var list = new List<int>.generate(100000, (_) => rng.nextInt(100000));
+    setState(() {
+      _list = list.toSet().toList();
+    });
+    var startTime = DateTime.now();
+    bubbleSort(_list);
+    var endTime = DateTime.now();
+    setState(() {
+      _timeTaken = endTime.difference(startTime).inMilliseconds.toDouble();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-    if (appState.favorites.isEmpty) {
-      return Center(
-        child: Text('No favorites yet.'),
-      );
-    }
-    return ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text('You have ${appState.favorites.length} favorites:'),
-        ),
-        for (var pair in appState.favorites)
-          ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text(pair.asLowerCase),
-          ),
-      ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Sort View'),
+      ),
+      body: Column(
+        children: <Widget>[
+          _timeTaken != null
+              ? Text('Time taken: ${_timeTaken.toStringAsFixed(3)} ms')
+              : Container(),
+          _list != null
+              ? Expanded(
+                  child: ListView.builder(
+                    itemCount: _list.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(_list[index].toString()),
+                      );
+                    },
+                  ),
+                )
+              : Container(),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: generateAndSortList,
+        child: Icon(Icons.sort),
+      ),
     );
   }
 }
