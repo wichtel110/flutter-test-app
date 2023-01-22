@@ -20,12 +20,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-List<int> generateRandomList() {
-  var rng = Random();
-  var list = List<int>.generate(1000000, (_) => rng.nextInt(1000000));
-  return list.toSet().toList();
-}
-
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key, required this.title});
 
